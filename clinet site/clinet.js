@@ -1,5 +1,5 @@
-var sockerServerUrl = "";
-var hostToLive = "http://localhost";
+var sockerServerUrl = "https://hzgroup.net/";
+var hostToLive = "http://localhost:8080";
 var socket = require('socket.io-client')(sockerServerUrl)
 const { response } = require('express');
 const superagent = require('superagent');
@@ -33,7 +33,7 @@ function executeget(url,params){
 }
 
 
-function executeget(url,params){
+function executePost(url,params){
     superagent.post(url)
     .query(params)
     .end((err,response)=>{
