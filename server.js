@@ -25,10 +25,16 @@ function handleRequest(req, res) {
     };
 
     io.emit("page-request", obj);
-    io.once("page-response", (response) => {
-        res.send(response);
-    });
+    io.on("page-response", createResponseHandler(res));
 }
+
+function createResponseHandler(res) {
+    return function(response) {
+        res.send(response);
+        io.removeAllListeners("page-response");
+    };
+}
+
 
 io.on('connection', (socket) => {
     console.log('a node connected');
