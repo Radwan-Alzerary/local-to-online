@@ -6,42 +6,34 @@ var bodyParser = require('body-parser');
 
 app.use(bodyParser());
 
-var clientResponseRefs = new Map(); // Create a new Map to store client response references
-
+var clientResponseRef;
 app.get('/*', (req, res) => {
-    var pathname = url.parse(req.url).pathname;
-
-    var obj = {
-        pathname: pathname,
-        method: "get",
-        params: req.query
-    }
-
-    io.emit("page-request", obj);
-    clientResponseRefs.set(req.socket.id, res); // Store the response reference by socket ID
-})
+    handleRequest(req, res);
+});
 
 app.post('/*', (req, res) => {
+    handleRequest(req, res);
+});
+
+function handleRequest(req, res) {
     var pathname = url.parse(req.url).pathname;
 
     var obj = {
         pathname: pathname,
-        method: "post",
-        params: req.body
-    }
+        method: req.method.toLowerCase(),
+        params: req.method === 'GET' ? req.query : req.body
+    };
 
     io.emit("page-request", obj);
-    clientResponseRefs.set(req.socket.id, res); // Store the response reference by socket ID
-})
+    io.once("page-response", (response) => {
+        res.send(response);
+    });
+}
 
 io.on('connection', (socket) => {
     console.log('a node connected');
     socket.on("page-response", (response) => {
-        var clientResponseRef = clientResponseRefs.get(socket.id); // Get the response reference by socket ID
-        if (clientResponseRef) {
-            clientResponseRef.send(response);
-            clientResponseRefs.delete(socket.id); // Remove the response reference after sending the response
-        }
+        clientResponseRef.send(response);
     })
 })
 
