@@ -6,7 +6,6 @@ var bodyParser = require('body-parser');
 
 app.use(bodyParser());
 
-var clientResponseRef;
 app.get('/*', (req, res) => {
     handleRequest(req, res);
 });
@@ -35,15 +34,11 @@ function createResponseHandler(res) {
     };
 }
 
-
 io.on('connection', (socket) => {
     console.log('a node connected');
-    socket.on("page-response", (response) => {
-        clientResponseRef.send(response);
-    })
 })
 
 var server_port = process.env.YOUR_PORT || process.env.PORT || 3000;
 http.listen(server_port, () => {
     console.log('listening on *:' + server_port);
-})
+});
